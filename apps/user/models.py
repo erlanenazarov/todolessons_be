@@ -10,7 +10,7 @@ from django.utils.translation import gettext_lazy as _
 class User(AbstractUser):
     id = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, unique=True)
     email = models.EmailField(_('email address'), unique=True, null=False)
-    username = models.TextField(max_length=255, unique=False)
+    username = models.TextField(max_length=255, unique=False, null=True, blank=True)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
