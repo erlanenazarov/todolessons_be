@@ -78,13 +78,24 @@ class UserCreateSerializer(serializers.Serializer):
         return value
 
     def validate(self, attrs):
+        first_name = attrs.get('first_name')
+        last_name = attrs.get('last_name')
+        errors = {}
+
+        if not first_name:
+            errors['first_name'] = [_('first_name is required!')]
+
+        if not last_name:
+            errors['last_name'] = [_('last_name is required!')]
+
         password = attrs.get('password')
         password1 = attrs.get('password1')
 
         if password != password1:
-            raise exceptions.ValidationError({
-                'password': [_('Passwords didn\'t match')]
-            })
+            errors['password'] = [_('Passwords didn\'t match')]
+
+        if len(errors.keys()) > 0:
+            raise exceptions.ValidationError(errors)
         return attrs
 
     def update(self, instance, validated_data):
