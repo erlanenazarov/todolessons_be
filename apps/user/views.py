@@ -1,15 +1,19 @@
 from rest_framework import generics, exceptions, status
+from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.views import TokenViewBase
 from drf_yasg.utils import swagger_auto_schema
 
+from django.utils.translation import gettext as _
+
 from apps.user.models import User
+
 from .serializers import (
     LoginSerializer,
     UserCreateSerializer,
     ProfileSerializer,
-    ChangePasswordSerializer,
+    ChangePasswordSerializer, UploadAvatarSerializer,
 )
 from .swagger import TokenResponseSerializer
 
@@ -136,3 +140,37 @@ class ChangePasswordAPIView(generics.UpdateAPIView):
     def perform_update(self, serializer):
         serializer.save()
 
+
+class UploadUserAvatar(generics.UpdateAPIView):
+    serializer_class = UploadAvatarSerializer
+    queryset = User.objects.all()
+    permission_classes = (IsAuthenticated,)
+    parser_classes = (MultiPartParser,)
+
+    def get_object(self):
+        return self.request.user
+
+    @swagger_auto_schema(
+        operation_summary='Upload user avatar',
+        request_body=UploadAvatarSerializer(),
+        responses={
+            200: ProfileSerializer()
+        }
+    )
+    def update(self, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=self.request.data, partial=False)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            # If 'prefetch_related' has been applied to a queryset, we need to
+            # forcibly invalidate the prefetch cache on the instance.
+            instance._prefetched_objects_cache = {}
+
+        data = ProfileSerializer(instance=instance).data
+        return Response(data)
+
+    @swagger_auto_schema(auto_schema=None)
+    def patch(self, *args, **kwargs):
+        raise exceptions.MethodNotAllowed('PATCH')

@@ -121,6 +121,7 @@ class ProfileSerializer(serializers.ModelSerializer):
             'last_name',
             'email',
             'date_joined',
+            'avatar',
         )
         extra_kwargs = {
             'id': {
@@ -165,4 +166,13 @@ class ChangePasswordSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         raise NotImplementedError(_('`ChangePasswordSerializer` cannot create an instance'))
+
+
+class UploadAvatarSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('avatar',)
+
+    def create(self, validated_data):
+        raise NotImplementedError('This serializer cannot create instance')
 

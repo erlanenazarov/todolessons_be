@@ -55,13 +55,15 @@ urlpatterns = [
                 path('refresh-token/', jwt_views.TokenRefreshView.as_view(), name='refresh_token'),
                 path('change-password/', user_views.ChangePasswordAPIView.as_view(), name='change_password'),
                 path('me/', user_views.ProfileAPIView.as_view(), name='profile'),
+                path('upload-avatar/', user_views.UploadUserAvatar.as_view(), name='upload_avatar'),
             ])),
             path('', include(viewset_router.urls)),
             path('tasks/<uuid:task>/', include(attachment_router.urls)),
         ])),
     ])),
 
-    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui')
+    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('apidoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 ]
 
 if settings.DEBUG:
